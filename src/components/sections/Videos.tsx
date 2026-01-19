@@ -113,24 +113,25 @@ export default function Videos() {
                 onClick={() => openLightbox(index)}
               >
                 {/* Thumbnail */}
-                <div className="relative aspect-video">
-                  {video.platform === 'youtube' ? (
+                <div className="relative aspect-video bg-surface">
+                  {video.platform === 'youtube' && video.video_id ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={video.thumbnail || getYouTubeThumbnail(video.video_id)}
+                      src={`https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`}
                       alt={video.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       onError={(e) => {
-                        // Fallback to medium quality if maxres not available
                         const target = e.target as HTMLImageElement
-                        if (target.src.includes('maxresdefault')) {
-                          target.src = `https://img.youtube.com/vi/${video.video_id}/hqdefault.jpg`
-                        }
+                        target.style.display = 'none'
                       }}
                     />
-                  ) : (
+                  ) : video.platform === 'instagram' ? (
                     <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center">
                       <span className="text-white text-4xl font-bold">IG</span>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full bg-surface flex items-center justify-center">
+                      <Play className="w-16 h-16 text-text-muted" />
                     </div>
                   )}
 
