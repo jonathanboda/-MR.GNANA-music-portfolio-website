@@ -42,29 +42,41 @@ export async function PUT(request: Request) {
     return unauthorizedResponse()
   }
 
-  const body = await request.json()
-  const { section, data } = body as { section: string; data: Record<string, string> }
+  try {
+    const body = await request.json()
+    const { section, data } = body as { section: string; data: Record<string, string> }
 
-  if (!section || !data) {
-    return NextResponse.json({ error: 'Missing section or data' }, { status: 400 })
+    if (!section || !data) {
+      return NextResponse.json({ error: 'Missing section or data' }, { status: 400 })
+    }
+
+    // Upsert each key-value pair
+    const entries = Object.entries(data)
+    const upserts = entries.map(([key, value]) => ({
+      section,
+      key,
+      value,
+      updated_at: new Date().toISOString()
+    }))
+
+    const { error } = await supabaseAdmin
+      .from('site_content')
+      .upsert(upserts, { onConflict: 'section,key' })
+
+    if (error) {
+      // Check for common errors
+      if (error.code === '42P01') {
+        return NextResponse.json({
+          error: 'Database table "site_content" not found. Please run the setup SQL in Supabase.'
+        }, { status: 500 })
+      }
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    console.error('Content PUT error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
-
-  // Upsert each key-value pair
-  const entries = Object.entries(data)
-  const upserts = entries.map(([key, value]) => ({
-    section,
-    key,
-    value,
-    updated_at: new Date().toISOString()
-  }))
-
-  const { error } = await supabaseAdmin
-    .from('site_content')
-    .upsert(upserts, { onConflict: 'section,key' })
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json({ success: true })
 }

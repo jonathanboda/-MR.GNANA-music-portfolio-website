@@ -66,13 +66,17 @@ export default function HeroEditor({ onSaveSuccess }: HeroEditorProps) {
         body: JSON.stringify({ section: 'hero', data: formData })
       })
 
-      if (!res.ok) throw new Error('Failed to save')
+      const result = await res.json()
+
+      if (!res.ok) {
+        throw new Error(result.error || `Failed to save (${res.status})`)
+      }
 
       setSuccess(true)
       onSaveSuccess()
       setTimeout(() => setSuccess(false), 3000)
-    } catch {
-      setError('Failed to save changes')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save changes')
     } finally {
       setLoading(false)
     }
