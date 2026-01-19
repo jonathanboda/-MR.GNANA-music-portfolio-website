@@ -146,6 +146,11 @@ export default function VideosEditor({ onSaveSuccess }: VideosEditorProps) {
 
     try {
       const token = localStorage.getItem('admin_token')
+      // Generate thumbnail URL for YouTube videos
+      const thumbnail = parsed.platform === 'youtube'
+        ? `https://i.ytimg.com/vi/${parsed.video_id}/hqdefault.jpg`
+        : null
+
       const res = await fetch('/api/admin/videos', {
         method: 'POST',
         headers: {
@@ -157,6 +162,7 @@ export default function VideosEditor({ onSaveSuccess }: VideosEditorProps) {
           description: newVideo.description,
           platform: parsed.platform,
           video_id: parsed.video_id,
+          thumbnail,
           order_index: videos.length
         })
       })
@@ -335,24 +341,36 @@ export default function VideosEditor({ onSaveSuccess }: VideosEditorProps) {
                 </div>
               ) : (
                 <>
-                  <div className="aspect-video relative bg-surface">
+                  <div className="aspect-video relative bg-gradient-to-br from-surface to-surface/50">
                     {video.platform === 'youtube' && video.video_id ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={`https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`}
-                        alt={video.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement
-                          target.style.display = 'none'
-                        }}
-                      />
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={video.thumbnail || `https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`}
+                          alt={video.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement
+                            // Try different thumbnail quality
+                            if (!target.src.includes('mqdefault')) {
+                              target.src = `https://i.ytimg.com/vi/${video.video_id}/mqdefault.jpg`
+                            } else {
+                              target.style.opacity = '0'
+                            }
+                          }}
+                        />
+                        {/* Fallback play icon shown behind image */}
+                        <div className="absolute inset-0 flex items-center justify-center -z-10">
+                          <Play className="w-12 h-12 text-text-muted" />
+                        </div>
+                      </>
                     ) : video.platform === 'instagram' ? (
                       <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center">
                         <span className="text-white text-2xl font-bold">IG</span>
                       </div>
                     ) : (
-                      <div className="w-full h-full bg-surface flex items-center justify-center">
+                      <div className="w-full h-full flex items-center justify-center">
                         <Play className="w-12 h-12 text-text-muted" />
                       </div>
                     )}
