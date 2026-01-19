@@ -1,19 +1,29 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import Sidebar from './components/Sidebar'
-import BookingsEditor from './sections/BookingsEditor'
-import HeroEditor from './sections/HeroEditor'
-import AboutEditor from './sections/AboutEditor'
-import MusicEditor from './sections/MusicEditor'
-import ServicesEditor from './sections/ServicesEditor'
-import GalleryEditor from './sections/GalleryEditor'
-import VideosEditor from './sections/VideosEditor'
-import EventsEditor from './sections/EventsEditor'
-import ContactEditor from './sections/ContactEditor'
-import NavigationEditor from './sections/NavigationEditor'
-import FooterEditor from './sections/FooterEditor'
+
+// Lazy load all editors for faster initial page load
+const BookingsEditor = dynamic(() => import('./sections/BookingsEditor'), { ssr: false })
+const HeroEditor = dynamic(() => import('./sections/HeroEditor'), { ssr: false })
+const AboutEditor = dynamic(() => import('./sections/AboutEditor'), { ssr: false })
+const MusicEditor = dynamic(() => import('./sections/MusicEditor'), { ssr: false })
+const ServicesEditor = dynamic(() => import('./sections/ServicesEditor'), { ssr: false })
+const GalleryEditor = dynamic(() => import('./sections/GalleryEditor'), { ssr: false })
+const VideosEditor = dynamic(() => import('./sections/VideosEditor'), { ssr: false })
+const EventsEditor = dynamic(() => import('./sections/EventsEditor'), { ssr: false })
+const ContactEditor = dynamic(() => import('./sections/ContactEditor'), { ssr: false })
+const NavigationEditor = dynamic(() => import('./sections/NavigationEditor'), { ssr: false })
+const FooterEditor = dynamic(() => import('./sections/FooterEditor'), { ssr: false })
+
+// Loading spinner component
+const EditorLoader = () => (
+  <div className="flex items-center justify-center py-20">
+    <div className="animate-spin w-8 h-8 border-2 border-neon-purple border-t-transparent rounded-full"></div>
+  </div>
+)
 
 export default function AdminDashboard() {
   const router = useRouter()
@@ -116,26 +126,28 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background lg:flex">
       <Sidebar
         activeSection={activeSection}
         onSelect={setActiveSection}
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 p-8 overflow-auto">
+      <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto pt-20 lg:pt-8">
         <div className="max-w-5xl mx-auto">
-          {activeSection === 'bookings' && <BookingsEditor onSaveSuccess={handleSaveSuccess} />}
-          {activeSection === 'hero' && <HeroEditor onSaveSuccess={handleSaveSuccess} />}
-          {activeSection === 'about' && <AboutEditor onSaveSuccess={handleSaveSuccess} />}
-          {activeSection === 'music' && <MusicEditor onSaveSuccess={handleSaveSuccess} />}
-          {activeSection === 'services' && <ServicesEditor onSaveSuccess={handleSaveSuccess} />}
-          {activeSection === 'gallery' && <GalleryEditor onSaveSuccess={handleSaveSuccess} />}
-          {activeSection === 'videos' && <VideosEditor onSaveSuccess={handleSaveSuccess} />}
-          {activeSection === 'events' && <EventsEditor onSaveSuccess={handleSaveSuccess} />}
-          {activeSection === 'contact' && <ContactEditor onSaveSuccess={handleSaveSuccess} />}
-          {activeSection === 'navigation' && <NavigationEditor onSaveSuccess={handleSaveSuccess} />}
-          {activeSection === 'footer' && <FooterEditor onSaveSuccess={handleSaveSuccess} />}
+          <Suspense fallback={<EditorLoader />}>
+            {activeSection === 'bookings' && <BookingsEditor onSaveSuccess={handleSaveSuccess} />}
+            {activeSection === 'hero' && <HeroEditor onSaveSuccess={handleSaveSuccess} />}
+            {activeSection === 'about' && <AboutEditor onSaveSuccess={handleSaveSuccess} />}
+            {activeSection === 'music' && <MusicEditor onSaveSuccess={handleSaveSuccess} />}
+            {activeSection === 'services' && <ServicesEditor onSaveSuccess={handleSaveSuccess} />}
+            {activeSection === 'gallery' && <GalleryEditor onSaveSuccess={handleSaveSuccess} />}
+            {activeSection === 'videos' && <VideosEditor onSaveSuccess={handleSaveSuccess} />}
+            {activeSection === 'events' && <EventsEditor onSaveSuccess={handleSaveSuccess} />}
+            {activeSection === 'contact' && <ContactEditor onSaveSuccess={handleSaveSuccess} />}
+            {activeSection === 'navigation' && <NavigationEditor onSaveSuccess={handleSaveSuccess} />}
+            {activeSection === 'footer' && <FooterEditor onSaveSuccess={handleSaveSuccess} />}
+          </Suspense>
         </div>
       </main>
     </div>

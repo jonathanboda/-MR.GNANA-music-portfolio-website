@@ -112,15 +112,24 @@ export default function Videos() {
                 className="group relative overflow-hidden rounded-2xl cursor-pointer bg-surface border border-border"
                 onClick={() => openLightbox(index)}
               >
-                {/* Thumbnail - Using YouTube embed like admin page */}
+                {/* Thumbnail - Using lightweight image for fast loading */}
                 <div className="relative aspect-video bg-gradient-to-br from-surface to-black overflow-hidden">
                   {video.platform === 'youtube' && video.video_id ? (
-                    <iframe
-                      src={`https://www.youtube.com/embed/${video.video_id}`}
-                      title={video.title}
-                      className="w-full h-full pointer-events-none"
-                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    />
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`}
+                        alt={video.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                      {/* Play button */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                          <Play className="w-8 h-8 text-white fill-white ml-1" />
+                        </div>
+                      </div>
+                    </>
                   ) : video.platform === 'instagram' ? (
                     <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center">
                       <span className="text-white text-4xl font-bold">IG</span>
@@ -133,12 +142,8 @@ export default function Videos() {
                     </div>
                   )}
 
-                  {/* Click overlay to open lightbox */}
-                  <div className="absolute inset-0 bg-transparent group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center border border-white/30 opacity-50 group-hover:opacity-100 transition-opacity">
-                      <Play className="w-8 h-8 text-white fill-white ml-1" />
-                    </div>
-                  </div>
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
 
                   {/* Platform Badge */}
                   <div className="absolute top-3 right-3 z-10">

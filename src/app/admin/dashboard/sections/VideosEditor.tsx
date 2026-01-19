@@ -342,14 +342,23 @@ export default function VideosEditor({ onSaveSuccess }: VideosEditorProps) {
               ) : (
                 <>
                   <div className="aspect-video relative bg-black overflow-hidden">
+                    {/* Use lightweight thumbnail instead of iframe for faster loading */}
                     {video.platform === 'youtube' && video.video_id ? (
-                      <iframe
-                        src={`https://www.youtube.com/embed/${video.video_id}`}
-                        title={video.title}
-                        className="w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`}
+                          alt={video.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                        {/* Play button overlay */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
+                            <Play className="w-7 h-7 text-white fill-white ml-1" />
+                          </div>
+                        </div>
+                      </>
                     ) : video.platform === 'instagram' ? (
                       <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center">
                         <span className="text-white text-2xl font-bold">IG</span>
@@ -361,7 +370,7 @@ export default function VideosEditor({ onSaveSuccess }: VideosEditorProps) {
                     )}
 
                     {/* Platform badge */}
-                    <div className="absolute top-2 right-2">
+                    <div className="absolute top-2 right-2 z-10">
                       {video.platform === 'youtube' ? (
                         <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center">
                           <Youtube className="w-4 h-4 text-white" />
@@ -371,13 +380,6 @@ export default function VideosEditor({ onSaveSuccess }: VideosEditorProps) {
                           <span className="text-white text-xs font-bold">IG</span>
                         </div>
                       )}
-                    </div>
-
-                    {/* Play icon overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-50">
-                      <div className="w-12 h-12 rounded-full bg-black/50 flex items-center justify-center">
-                        <Play className="w-6 h-6 text-white fill-white ml-0.5" />
-                      </div>
                     </div>
                   </div>
 
