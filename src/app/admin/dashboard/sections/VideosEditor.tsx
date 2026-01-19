@@ -336,20 +336,24 @@ export default function VideosEditor({ onSaveSuccess }: VideosEditorProps) {
               ) : (
                 <>
                   <div className="aspect-video relative bg-surface">
-                    {video.platform === 'youtube' ? (
+                    {video.platform === 'youtube' && video.video_id ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={video.thumbnail || getYouTubeThumbnail(video.video_id)}
+                        src={`https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`}
                         alt={video.title}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement
-                          target.src = `https://img.youtube.com/vi/${video.video_id}/hqdefault.jpg`
+                          target.style.display = 'none'
                         }}
                       />
-                    ) : (
+                    ) : video.platform === 'instagram' ? (
                       <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center">
                         <span className="text-white text-2xl font-bold">IG</span>
+                      </div>
+                    ) : (
+                      <div className="w-full h-full bg-surface flex items-center justify-center">
+                        <Play className="w-12 h-12 text-text-muted" />
                       </div>
                     )}
 
