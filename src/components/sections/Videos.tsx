@@ -120,6 +120,7 @@ export default function Videos() {
                       src={`https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`}
                       alt={video.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      referrerPolicy="no-referrer"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement
                         target.style.display = 'none'

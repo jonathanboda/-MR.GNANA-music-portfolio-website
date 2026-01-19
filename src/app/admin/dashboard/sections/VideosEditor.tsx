@@ -350,6 +350,8 @@ export default function VideosEditor({ onSaveSuccess }: VideosEditorProps) {
                           alt={video.title}
                           className="w-full h-full object-cover"
                           loading="lazy"
+                          referrerPolicy="no-referrer"
+                          crossOrigin="anonymous"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement
                             // Try different thumbnail quality
