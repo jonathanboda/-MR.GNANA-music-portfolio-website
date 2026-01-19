@@ -420,6 +420,7 @@ export default function VideosEditor({ onSaveSuccess }: VideosEditorProps) {
                       <p className="text-xs text-text-muted truncate mt-1">{video.description}</p>
                     )}
                     <p className="text-xs text-text-muted mt-1 capitalize">{video.platform}</p>
+                    <p className="text-[10px] text-text-muted/50 mt-1 font-mono">ID: {video.video_id}</p>
                   </div>
                 </>
               )}
