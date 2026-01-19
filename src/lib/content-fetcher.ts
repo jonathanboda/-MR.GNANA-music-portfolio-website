@@ -1,18 +1,18 @@
-import { supabase } from './supabase'
+import { supabaseAdmin } from './supabase-server'
 import { siteContent as staticContent } from '@/data/content'
 
 export async function getContent() {
   try {
     // Fetch all content in parallel - wrap each in try-catch to handle individual failures
     const results = await Promise.allSettled([
-      supabase.from('site_content').select('*'),
-      supabase.from('tracks').select('*').eq('is_active', true).order('order_index'),
-      supabase.from('gallery').select('*').eq('is_active', true).order('order_index'),
-      supabase.from('services').select('*').eq('is_active', true).order('order_index'),
-      supabase.from('social_links').select('*').eq('is_active', true).order('order_index'),
-      supabase.from('nav_links').select('*').eq('is_active', true).order('order_index'),
-      supabase.from('events').select('*').order('created_at', { ascending: false }),
-      supabase.from('videos').select('*').eq('is_active', true).order('order_index')
+      supabaseAdmin.from('site_content').select('*'),
+      supabaseAdmin.from('tracks').select('*').eq('is_active', true).order('order_index'),
+      supabaseAdmin.from('gallery').select('*').eq('is_active', true).order('order_index'),
+      supabaseAdmin.from('services').select('*').eq('is_active', true).order('order_index'),
+      supabaseAdmin.from('social_links').select('*').eq('is_active', true).order('order_index'),
+      supabaseAdmin.from('nav_links').select('*').eq('is_active', true).order('order_index'),
+      supabaseAdmin.from('events').select('*').order('created_at', { ascending: false }),
+      supabaseAdmin.from('videos').select('*').eq('is_active', true).order('order_index')
     ])
 
     // Extract data safely, defaulting to empty/null on errors
