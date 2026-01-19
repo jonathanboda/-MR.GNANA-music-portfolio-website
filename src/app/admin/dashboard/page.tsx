@@ -126,28 +126,34 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background lg:flex">
+    <div className="min-h-screen bg-background flex">
       <Sidebar
         activeSection={activeSection}
         onSelect={setActiveSection}
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto pt-20 lg:pt-8">
-        <div className="max-w-5xl mx-auto">
-          <Suspense fallback={<EditorLoader />}>
-            {activeSection === 'bookings' && <BookingsEditor onSaveSuccess={handleSaveSuccess} />}
-            {activeSection === 'hero' && <HeroEditor onSaveSuccess={handleSaveSuccess} />}
-            {activeSection === 'about' && <AboutEditor onSaveSuccess={handleSaveSuccess} />}
-            {activeSection === 'music' && <MusicEditor onSaveSuccess={handleSaveSuccess} />}
-            {activeSection === 'services' && <ServicesEditor onSaveSuccess={handleSaveSuccess} />}
-            {activeSection === 'gallery' && <GalleryEditor onSaveSuccess={handleSaveSuccess} />}
-            {activeSection === 'videos' && <VideosEditor onSaveSuccess={handleSaveSuccess} />}
-            {activeSection === 'events' && <EventsEditor onSaveSuccess={handleSaveSuccess} />}
-            {activeSection === 'contact' && <ContactEditor onSaveSuccess={handleSaveSuccess} />}
-            {activeSection === 'navigation' && <NavigationEditor onSaveSuccess={handleSaveSuccess} />}
-            {activeSection === 'footer' && <FooterEditor onSaveSuccess={handleSaveSuccess} />}
-          </Suspense>
+      {/* Main content area */}
+      <main className="flex-1 min-w-0 overflow-auto">
+        {/* Spacer for mobile header */}
+        <div className="lg:hidden h-16" />
+
+        <div className="p-4 md:p-6 lg:p-8">
+          <div className="max-w-5xl mx-auto">
+            <Suspense fallback={<EditorLoader />}>
+              {activeSection === 'bookings' && <BookingsEditor onSaveSuccess={handleSaveSuccess} />}
+              {activeSection === 'hero' && <HeroEditor onSaveSuccess={handleSaveSuccess} />}
+              {activeSection === 'about' && <AboutEditor onSaveSuccess={handleSaveSuccess} />}
+              {activeSection === 'music' && <MusicEditor onSaveSuccess={handleSaveSuccess} />}
+              {activeSection === 'services' && <ServicesEditor onSaveSuccess={handleSaveSuccess} />}
+              {activeSection === 'gallery' && <GalleryEditor onSaveSuccess={handleSaveSuccess} />}
+              {activeSection === 'videos' && <VideosEditor onSaveSuccess={handleSaveSuccess} />}
+              {activeSection === 'events' && <EventsEditor onSaveSuccess={handleSaveSuccess} />}
+              {activeSection === 'contact' && <ContactEditor onSaveSuccess={handleSaveSuccess} />}
+              {activeSection === 'navigation' && <NavigationEditor onSaveSuccess={handleSaveSuccess} />}
+              {activeSection === 'footer' && <FooterEditor onSaveSuccess={handleSaveSuccess} />}
+            </Suspense>
+          </div>
         </div>
       </main>
     </div>
