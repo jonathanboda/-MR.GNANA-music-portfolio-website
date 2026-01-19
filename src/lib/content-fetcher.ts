@@ -12,7 +12,7 @@ export async function getContent() {
       supabaseAdmin.from('social_links').select('*').eq('is_active', true).order('order_index'),
       supabaseAdmin.from('nav_links').select('*').eq('is_active', true).order('order_index'),
       supabaseAdmin.from('events').select('*').order('created_at', { ascending: false }),
-      supabaseAdmin.from('videos').select('*').eq('is_active', true).order('order_index')
+      supabaseAdmin.from('videos').select('*').order('order_index')
     ])
 
     // Extract data safely, defaulting to empty/null on errors
