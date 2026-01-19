@@ -112,42 +112,36 @@ export default function Videos() {
                 className="group relative overflow-hidden rounded-2xl cursor-pointer bg-surface border border-border"
                 onClick={() => openLightbox(index)}
               >
-                {/* Thumbnail */}
-                <div className="relative aspect-video bg-gradient-to-br from-surface to-black">
-                  {/* Fallback play icon - always visible behind */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-20 h-20 rounded-full bg-red-600/80 flex items-center justify-center">
-                      <Play className="w-10 h-10 text-white fill-white ml-1" />
-                    </div>
-                  </div>
-
+                {/* Thumbnail - Using YouTube embed like admin page */}
+                <div className="relative aspect-video bg-gradient-to-br from-surface to-black overflow-hidden">
                   {video.platform === 'youtube' && video.video_id ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={video.thumbnail || `https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`}
-                      alt={video.title}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.style.opacity = '0'
-                      }}
+                    <iframe
+                      src={`https://www.youtube.com/embed/${video.video_id}`}
+                      title={video.title}
+                      className="w-full h-full pointer-events-none"
+                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     />
                   ) : video.platform === 'instagram' ? (
                     <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center">
                       <span className="text-white text-4xl font-bold">IG</span>
                     </div>
-                  ) : null}
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-20 h-20 rounded-full bg-red-600/80 flex items-center justify-center">
+                        <Play className="w-10 h-10 text-white fill-white ml-1" />
+                      </div>
+                    </div>
+                  )}
 
-                  {/* Play Button Overlay */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                  {/* Click overlay to open lightbox */}
+                  <div className="absolute inset-0 bg-transparent group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center border border-white/30 opacity-50 group-hover:opacity-100 transition-opacity">
                       <Play className="w-8 h-8 text-white fill-white ml-1" />
                     </div>
                   </div>
 
                   {/* Platform Badge */}
-                  <div className="absolute top-3 right-3">
+                  <div className="absolute top-3 right-3 z-10">
                     {video.platform === 'youtube' ? (
                       <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center">
                         <Youtube className="w-4 h-4 text-white" />
