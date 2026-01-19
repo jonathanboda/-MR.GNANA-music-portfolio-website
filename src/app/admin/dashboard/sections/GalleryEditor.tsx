@@ -18,22 +18,14 @@ const defaults = {
   subtitle: siteContent.gallery.subtitle
 }
 
-// Convert static gallery images to GalleryImage type for initial display
-// Use negative IDs for static images to distinguish from database images
-const defaultImages: GalleryImage[] = siteContent.gallery.images.map((img, index) => ({
-  id: -(img.id), // Negative ID to mark as static
-  src: img.src,
-  alt: img.alt,
-  description: '',
-  order_index: index,
-  is_active: true
-}))
+// Default images for initialization
+const defaultImagesData = siteContent.gallery.images
 
 export default function GalleryEditor({ onSaveSuccess }: GalleryEditorProps) {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
-  const [images, setImages] = useState<GalleryImage[]>(defaultImages)
+  const [images, setImages] = useState<GalleryImage[]>([])
   const [sectionData, setSectionData] = useState(defaults)
   const [editingImage, setEditingImage] = useState<GalleryImage | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -74,11 +66,40 @@ export default function GalleryEditor({ onSaveSuccess }: GalleryEditorProps) {
       })
       const data = await res.json()
       if (Array.isArray(data)) {
-        // Merge: static images (negative IDs) + database images (positive IDs)
-        setImages([...defaultImages, ...data])
+        setImages(data)
       }
     } catch (err) {
       console.error('Failed to fetch gallery:', err)
+    }
+  }
+
+  const handleInitializeDefaults = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const token = localStorage.getItem('admin_token')
+      for (let i = 0; i < defaultImagesData.length; i++) {
+        const img = defaultImagesData[i]
+        await fetch('/api/admin/gallery', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            src: img.src,
+            alt: img.alt,
+            description: '',
+            order_index: i
+          })
+        })
+      }
+      await fetchGallery()
+      onSaveSuccess()
+    } catch {
+      setError('Failed to initialize gallery')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -254,94 +275,92 @@ export default function GalleryEditor({ onSaveSuccess }: GalleryEditorProps) {
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {images.map((image) => {
-            const isStatic = image.id < 0 // Negative IDs are static images
-            return (
-              <div
-                key={image.id}
-                className={`relative group bg-surface/50 border rounded-lg overflow-hidden ${isStatic ? 'border-white/5' : 'border-neon-purple/30'}`}
-              >
-                {editingImage?.id === image.id ? (
-                  <div className="p-4 space-y-3">
-                    <FormField
-                      label="Alt Text"
-                      value={editingImage.alt}
-                      onChange={(v) => setEditingImage({ ...editingImage, alt: v })}
-                    />
-                    <FormField
-                      label="Description"
-                      value={editingImage.description || ''}
-                      onChange={(v) => setEditingImage({ ...editingImage, description: v })}
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleUpdateImage(editingImage)}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg text-sm transition-colors"
-                      >
-                        <Check className="w-4 h-4" />
-                        Save
-                      </button>
-                      <button
-                        onClick={() => setEditingImage(null)}
-                        className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+          {images.map((image) => (
+            <div
+              key={image.id}
+              className="relative group bg-surface/50 border border-neon-purple/30 rounded-lg overflow-hidden"
+            >
+              {editingImage?.id === image.id ? (
+                <div className="p-4 space-y-3">
+                  <FormField
+                    label="Alt Text"
+                    value={editingImage.alt}
+                    onChange={(v) => setEditingImage({ ...editingImage, alt: v })}
+                  />
+                  <FormField
+                    label="Description"
+                    value={editingImage.description || ''}
+                    onChange={(v) => setEditingImage({ ...editingImage, description: v })}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleUpdateImage(editingImage)}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg text-sm transition-colors"
+                    >
+                      <Check className="w-4 h-4" />
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditingImage(null)}
+                      className="px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="aspect-square relative bg-surface">
+                    {image.src ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={image.src}
+                        alt={image.alt}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                          target.nextElementSibling?.classList.remove('hidden')
+                        }}
+                      />
+                    ) : null}
+                    <div className={`absolute inset-0 flex items-center justify-center ${image.src ? 'hidden' : ''}`}>
+                      <ImageIcon className="w-8 h-8 text-text-muted" />
                     </div>
                   </div>
-                ) : (
-                  <>
-                    <div className="aspect-square relative bg-surface">
-                      {image.src ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={image.src}
-                          alt={image.alt}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement
-                            target.style.display = 'none'
-                            target.nextElementSibling?.classList.remove('hidden')
-                          }}
-                        />
-                      ) : null}
-                      <div className={`absolute inset-0 flex items-center justify-center ${image.src ? 'hidden' : ''}`}>
-                        <ImageIcon className="w-8 h-8 text-text-muted" />
-                      </div>
-                      {isStatic && (
-                        <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/70 rounded text-[10px] text-text-muted">
-                          Static
-                        </div>
-                      )}
-                    </div>
-                    {!isStatic && (
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => setEditingImage(image)}
-                          className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                        >
-                          <Edit2 className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteImage(image.id)}
-                          className="p-2 bg-red-500/50 hover:bg-red-500/70 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
-                    )}
-                    <div className="p-2">
-                      <p className="text-xs text-text-muted truncate">{image.alt}</p>
-                    </div>
-                  </>
-                )}
-              </div>
-            )
-          })}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => setEditingImage(image)}
+                      className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                    >
+                      <Edit2 className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteImage(image.id)}
+                      className="p-2 bg-red-500/50 hover:bg-red-500/70 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="p-2">
+                    <p className="text-xs text-text-muted truncate">{image.alt}</p>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
 
           {images.length === 0 && !showAddForm && (
-            <div className="col-span-full text-center text-text-muted py-8">
-              No images yet. Add your first image above.
+            <div className="col-span-full text-center py-8">
+              <p className="text-text-muted mb-4">No images in database yet.</p>
+              <button
+                onClick={handleInitializeDefaults}
+                disabled={loading}
+                className="px-6 py-3 bg-neon-cyan/20 hover:bg-neon-cyan/30 border border-neon-cyan/30 text-neon-cyan rounded-lg transition-colors mr-3"
+              >
+                Load Default Images
+              </button>
+              <span className="text-text-muted text-sm">or add your own above</span>
             </div>
           )}
         </div>

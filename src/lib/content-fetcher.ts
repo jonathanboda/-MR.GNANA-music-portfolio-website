@@ -108,16 +108,13 @@ export async function getContent() {
       gallery: {
         title: galleryData?.title || staticContent.gallery.title,
         subtitle: galleryData?.subtitle || staticContent.gallery.subtitle,
-        // Merge static images with database images
-        images: [
-          ...staticContent.gallery.images,
-          ...galleryRows.map(img => ({
-            id: img.id,
-            src: img.src,
-            alt: img.alt,
-            description: img.description || ''
-          }))
-        ],
+        // Use DB images if available, otherwise fallback to static
+        images: galleryRows.length ? galleryRows.map(img => ({
+          id: img.id,
+          src: img.src,
+          alt: img.alt,
+          description: img.description || ''
+        })) : staticContent.gallery.images,
       },
       videos: {
         title: videosData?.title || staticContent.videos.title,

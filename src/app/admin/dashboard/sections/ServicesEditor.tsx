@@ -23,21 +23,15 @@ const defaults = {
   subtitle: siteContent.services.subtitle
 }
 
-// Convert static services to Service type for initial display
-const defaultServices: Service[] = siteContent.services.items.map((item, index) => ({
-  id: item.id,
-  title: item.title,
-  description: item.description,
-  icon: item.icon,
-  order_index: index,
-  is_active: true
-}))
+// Default services from content.ts (for initialization)
+const defaultServicesData = siteContent.services.items
 
 export default function ServicesEditor({ onSaveSuccess }: ServicesEditorProps) {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
-  const [services, setServices] = useState<Service[]>(defaultServices)
+  const [services, setServices] = useState<Service[]>([])
+  const [isInitialized, setIsInitialized] = useState(false)
   const [sectionData, setSectionData] = useState(defaults)
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -77,12 +71,42 @@ export default function ServicesEditor({ onSaveSuccess }: ServicesEditorProps) {
         headers: { Authorization: `Bearer ${token}` }
       })
       const data = await res.json()
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         setServices(data)
+        setIsInitialized(data.length > 0)
       }
-      // If no data from DB, keep the default services
     } catch (err) {
       console.error('Failed to fetch services:', err)
+    }
+  }
+
+  const handleInitializeDefaults = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const token = localStorage.getItem('admin_token')
+      for (let i = 0; i < defaultServicesData.length; i++) {
+        const service = defaultServicesData[i]
+        await fetch('/api/admin/services', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            title: service.title,
+            description: service.description,
+            icon: service.icon,
+            order_index: i
+          })
+        })
+      }
+      await fetchServices()
+      onSaveSuccess()
+    } catch {
+      setError('Failed to initialize services')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -349,8 +373,16 @@ export default function ServicesEditor({ onSaveSuccess }: ServicesEditorProps) {
           })}
 
           {services.length === 0 && !showAddForm && (
-            <div className="col-span-full text-center text-text-muted py-8">
-              No services yet. Add your first service above.
+            <div className="col-span-full text-center py-8">
+              <p className="text-text-muted mb-4">No services in database yet.</p>
+              <button
+                onClick={handleInitializeDefaults}
+                disabled={loading}
+                className="px-6 py-3 bg-neon-cyan/20 hover:bg-neon-cyan/30 border border-neon-cyan/30 text-neon-cyan rounded-lg transition-colors mr-3"
+              >
+                Load Default Services
+              </button>
+              <span className="text-text-muted text-sm">or add your own above</span>
             </div>
           )}
         </div>
