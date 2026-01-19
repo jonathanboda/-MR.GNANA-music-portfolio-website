@@ -1,49 +1,28 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { useContent } from '@/lib/content-context'
-import { supabase, Event } from '@/lib/supabase'
 import { MapPin, Clock, Calendar, Sparkles } from 'lucide-react'
+
+interface EventItem {
+  id: number
+  title: string
+  description: string
+  date: string
+  time?: string
+  location?: string
+  type?: string
+}
 
 export default function Events() {
   const { content } = useContent()
   const sectionRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
 
-  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([])
-  const [pastEvents, setPastEvents] = useState<Event[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchEvents()
-  }, [])
-
-  const fetchEvents = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('date', { ascending: false })
-
-      if (error) {
-        console.error('Supabase error:', error)
-        // Fallback to static content
-        setUpcomingEvents(content.events.upcomingEvents as unknown as Event[])
-        setPastEvents(content.events.pastEvents as unknown as Event[])
-      } else {
-        setUpcomingEvents(data?.filter(e => e.type === 'upcoming') || [])
-        setPastEvents(data?.filter(e => e.type === 'past') || [])
-      }
-    } catch (err) {
-      console.error('Error fetching events:', err)
-      // Fallback to static content
-      setUpcomingEvents(content.events.upcomingEvents as unknown as Event[])
-      setPastEvents(content.events.pastEvents as unknown as Event[])
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Use data from server-side content fetch
+  const upcomingEvents = (content.events?.upcomingEvents || []) as EventItem[]
+  const pastEvents = (content.events?.pastEvents || []) as EventItem[]
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -126,11 +105,7 @@ export default function Events() {
               Upcoming Events
             </h3>
 
-            {loading ? (
-              <div className="bg-surface border border-border rounded-2xl p-12 text-center">
-                <p className="text-text-muted">Loading events...</p>
-              </div>
-            ) : upcomingEvents.length === 0 ? (
+            {upcomingEvents.length === 0 ? (
               /* Empty State */
               <div className="bg-surface border border-border rounded-2xl p-12 text-center">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
@@ -142,7 +117,7 @@ export default function Events() {
             ) : (
               /* Upcoming Events Grid */
               <div className="grid md:grid-cols-2 gap-6">
-                {upcomingEvents.map((event, index) => {
+                {upcomingEvents.map((event: EventItem, index: number) => {
                   const { day, month } = parseDate(event.date)
                   return (
                     <motion.div
@@ -192,14 +167,14 @@ export default function Events() {
           </motion.div>
 
           {/* Past Events Section */}
-          {!loading && pastEvents.length > 0 && (
+          {pastEvents.length > 0 && (
             <motion.div variants={itemVariants}>
               <h3 className="text-2xl font-display font-bold text-white mb-6">
                 Past Events
               </h3>
 
               <div className="grid md:grid-cols-2 gap-6">
-                {pastEvents.map((event, index) => {
+                {pastEvents.map((event: EventItem, index: number) => {
                   const { day, month } = parseDate(event.date)
                   return (
                     <motion.div
