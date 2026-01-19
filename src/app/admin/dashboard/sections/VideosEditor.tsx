@@ -341,38 +341,21 @@ export default function VideosEditor({ onSaveSuccess }: VideosEditorProps) {
                 </div>
               ) : (
                 <>
-                  <div className="aspect-video relative bg-gradient-to-br from-surface to-surface/50">
+                  <div className="aspect-video relative bg-black overflow-hidden">
                     {video.platform === 'youtube' && video.video_id ? (
-                      <>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={video.thumbnail || `https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`}
-                          alt={video.title}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          referrerPolicy="no-referrer"
-                          crossOrigin="anonymous"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement
-                            // Try different thumbnail quality
-                            if (!target.src.includes('mqdefault')) {
-                              target.src = `https://i.ytimg.com/vi/${video.video_id}/mqdefault.jpg`
-                            } else {
-                              target.style.opacity = '0'
-                            }
-                          }}
-                        />
-                        {/* Fallback play icon shown behind image */}
-                        <div className="absolute inset-0 flex items-center justify-center -z-10">
-                          <Play className="w-12 h-12 text-text-muted" />
-                        </div>
-                      </>
+                      <iframe
+                        src={`https://www.youtube.com/embed/${video.video_id}`}
+                        title={video.title}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
                     ) : video.platform === 'instagram' ? (
                       <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center">
                         <span className="text-white text-2xl font-bold">IG</span>
                       </div>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-full h-full flex items-center justify-center bg-surface">
                         <Play className="w-12 h-12 text-text-muted" />
                       </div>
                     )}
